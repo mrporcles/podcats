@@ -12,14 +12,3 @@
         {{ items }}
     </channel>
 </rss>
-
-
-
-<itunes:image href="https://i1.sndcdn.com/avatars-2rP122hYiP5jfQRI-07LZoA-original.jpg"/>
-        <image>
-          <url>https://i1.sndcdn.com/avatars-2rP122hYiP5jfQRI-07LZoA-original.jpg</url>
-          <title>Resident Advisor</title>
-          <link>https://ra.co/</link>
-        </image>
-        <itunes:category text="Music"/>
-        <item>
