@@ -27,7 +27,7 @@ from flask import Flask, Response
 # noinspection PyPackageRequirements
 from jinja2 import Environment, FileSystemLoader
 
-__version__ = '0.6.3'
+__version__ = '0.6.4'
 __licence__ = 'BSD'
 __author__ = 'Jakub Roztocil'
 __url__ = 'https://github.com/jakubroztocil/podcats'
@@ -256,13 +256,13 @@ def serve(channel):
         view_func=channel.as_html,
         methods=['GET'],
     )
-    server.run(host=channel.host, port=channel.port, debug=channel.debug, threaded=True)
+    server.run(host=channel.host, port=5000, debug=channel.debug, threaded=True)
 
 
 def main():
     """Main function"""
     args = parser.parse_args()
-    url = 'http://' + args.host + ':' + args.port
+    url = 'http://' + args.host
     channel = Channel(
         root_dir=path.abspath(args.directory),
         root_url=url,
