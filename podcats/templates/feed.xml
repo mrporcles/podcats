@@ -3,7 +3,23 @@
     <channel>
         <title>{{ title }}</title>
         <description>{{ description }}</description>
+        <image>
+          <url>{{ link }}/static/essentialmix.jpg</url>
+          <title>Essential Mix</title>
+          <link>https://www.bbc.co.uk/programmes/b006wkfp</link>
+        </image>
         <link>{{ link }}</link>
         {{ items }}
     </channel>
 </rss>
+
+
+
+<itunes:image href="https://i1.sndcdn.com/avatars-2rP122hYiP5jfQRI-07LZoA-original.jpg"/>
+        <image>
+          <url>https://i1.sndcdn.com/avatars-2rP122hYiP5jfQRI-07LZoA-original.jpg</url>
+          <title>Resident Advisor</title>
+          <link>https://ra.co/</link>
+        </image>
+        <itunes:category text="Music"/>
+        <item>
