@@ -131,10 +131,7 @@ class Episode(object):
         if self.id3 is not None:
             val = self.id3.getall('TIT2')
             if len(val) > 0:
-                text += str(val[0])
-            val = self.id3.getall('COMM')
-            if len(val) > 0:
-                text += ' ' + str(val[0])
+                text = str(val[0])
         return text
 
     @property
@@ -145,7 +142,7 @@ class Episode(object):
     @property
     def date(self):
         """Return episode date as unix timestamp"""
-        dt = self.get_tag('date')
+        dt = self.id3.getall('DATE')
         if dt:
             formats = [
                 '%Y-%m-%d:%H:%M:%S',
