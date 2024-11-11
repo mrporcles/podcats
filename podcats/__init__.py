@@ -127,11 +127,14 @@ class Episode(object):
     @property
     def title(self):
         """Return episode title"""
-        text = os.path.splitext(os.path.basename(self.filename))
+        text = os.path.splitext(os.path.basename(self.filename))[0]
         if self.id3 is not None:
             val = self.id3.getall('TIT2')
             if len(val) > 0:
-                text = str(val[0])
+                text += str(val[0])
+            val = self.id3.getall('COMM')
+            if len(val) > 0:
+                text += ' ' + str(val[0])
         return text
 
     @property
