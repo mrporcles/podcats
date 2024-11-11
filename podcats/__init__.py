@@ -127,12 +127,11 @@ class Episode(object):
     @property
     def title(self):
         """Return episode title"""
-        text = os.path.splitext(os.path.basename(self.filename))[0]
+        text = os.path.splitext(os.path.basename(self.filename))
         if self.id3 is not None:
             val = self.id3.getall('TIT2')
             if len(val) > 0:
                 text = str(val[0])
-        text = os.path.splitext(os.path.basename(self.filename))
         return text
 
     @property
@@ -143,7 +142,7 @@ class Episode(object):
     @property
     def date(self):
         """Return episode date as unix timestamp"""
-        dt = os.path.splitext(os.path.basename(self.filename))[0].split(' - ')[0]
+        dt = self.get_tag('date')
         if dt:
             formats = [
                 '%Y-%m-%d:%H:%M:%S',
