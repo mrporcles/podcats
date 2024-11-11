@@ -142,7 +142,7 @@ class Episode(object):
     @property
     def date(self):
         """Return episode date as unix timestamp"""
-        dt = self.id3.getall('DATE')
+        dt = self.get_tag('date')
         if dt:
             formats = [
                 '%Y-%m-%d:%H:%M:%S',
