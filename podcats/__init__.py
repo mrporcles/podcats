@@ -127,14 +127,8 @@ class Episode(object):
     @property
     def title(self):
         """Return episode title"""
-        text = os.path.splitext(os.path.basename(self.filename))[0]
-        if self.id3 is not None:
-            val = self.id3.getall('TIT2')
-            if len(val) > 0:
-                text += str(val[0])
-            val = self.id3.getall('COMM')
-            if len(val) > 0:
-                text += ' ' + str(val[0])
+        text = ' - '.join(os.path.basename(self.filename).split(' - ')[1:])
+        text = os.path.splitext(os.path.basename(text))[0]
         return text
 
     @property
@@ -145,7 +139,7 @@ class Episode(object):
     @property
     def date(self):
         """Return episode date as unix timestamp"""
-        dt = self.get_tag('date')
+        dt = os.path.basename(self.filename).split(' - ')[0]
         if dt:
             formats = [
                 '%Y-%m-%d:%H:%M:%S',
@@ -225,7 +219,7 @@ class Channel(object):
             title=escape(self.title),
             description=escape(self.description),
             link=escape(self.link),
-            items=u''.join(episode.as_xml() for episode in sorted(self))
+            items=u''.join(episode.as_xml() for episode in sorted(self, reverse=True))
         ).strip()
 
     def as_html(self):
@@ -235,7 +229,7 @@ class Channel(object):
             title=escape(self.title),
             description=self.description,
             link=escape(self.link),
-            items=u''.join(episode.as_html() for episode in sorted(self)),
+            items=u''.join(episode.as_html() for episode in sorted(self, reverse=True)),
         ).strip().encode("utf-8", "surrogateescape")
 
 
