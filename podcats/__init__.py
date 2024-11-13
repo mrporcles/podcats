@@ -262,7 +262,7 @@ def serve(channel):
 def main():
     """Main function"""
     args = parser.parse_args()
-    url = 'http://' + args.host
+    url = 'https://' + args.host
     channel = Channel(
         root_dir=path.abspath(args.directory),
         root_url=url,
