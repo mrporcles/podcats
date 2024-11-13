@@ -5,7 +5,7 @@
         <description>{{ description }}</description>
         <image>
           <url>{{ link }}/static/essentialmix.jpg</url>
-          <title>Essential Mix</title>
+          <title>{{ title }}</title>
           <link>https://www.bbc.co.uk/programmes/b006wkfp</link>
         </image>
         <link>{{ link }}</link>

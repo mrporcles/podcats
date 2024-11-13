@@ -27,7 +27,7 @@ from flask import Flask, Response
 # noinspection PyPackageRequirements
 from jinja2 import Environment, FileSystemLoader
 
-__version__ = '0.6.4'
+__version__ = '0.6.5'
 __licence__ = 'BSD'
 __author__ = 'Jakub Roztocil'
 __url__ = 'https://github.com/jakubroztocil/podcats'
@@ -127,8 +127,11 @@ class Episode(object):
     @property
     def title(self):
         """Return episode title"""
-        text = ' - '.join(os.path.basename(self.filename).split(' - ')[1:])
-        text = os.path.splitext(os.path.basename(text))[0]
+        filename = os.path.splitext(os.path.basename(self.filename))[0]
+        titleparts = os.path.basename(filename).split(' - ')
+        text = (titleparts[1])
+        if len(titleparts) == 4:
+            text = (text + " (" + titleparts[3] + ")")
         return text
 
     @property
@@ -175,12 +178,15 @@ class Episode(object):
     def image(self):
         """Return an eventual cover image"""
         directory = os.path.split(self.filename)[0]
+        name = os.path.splitext(os.path.basename(self.filename))[0]
         image_files = []
 
         for fn in os.listdir(directory):
-            ext = os.path.splitext(fn)[1]
-            if ext.lower() in BOOK_COVER_EXTENSIONS:
-                image_files.append(fn)
+            fnname = os.path.splitext(fn)[0]
+            fnext = os.path.splitext(fn)[1]
+            if fnname == name:
+                if fnext.lower() in BOOK_COVER_EXTENSIONS:
+                    image_files.append(fn)
 
         if len(image_files) > 0:
             abs_path_image = image_files[0]
