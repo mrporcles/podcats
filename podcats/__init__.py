@@ -36,7 +36,7 @@ __url__ = 'https://github.com/jakubroztocil/podcats'
 WEB_PATH = '/web'
 STATIC_PATH = '/static'
 TEMPLATES_ROOT = os.path.join(os.path.dirname(__file__), 'templates')
-BOOK_COVER_EXTENSIONS = ('.jpg', '.jpeg', '.png')
+EPISODE_COVER_EXTENSIONS = ('.jpg', '.jpeg', '.png')
 
 jinja2_env = Environment(loader=FileSystemLoader(TEMPLATES_ROOT))
 
@@ -124,6 +124,12 @@ class Episode(object):
         url = self.root_url + quote(path_, errors="surrogateescape")
         return url
 
+    def _to_image_url(self, filepath):
+        path_ = STATIC_PATH + '/' + self.relative_dir + '/' + filepath
+        path_ = re.sub(r'//', '/', path_)
+        url = self.root_url + quote(path_, errors="surrogateescape")
+        return url
+
     @property
     def title(self):
         """Return episode title"""
@@ -176,24 +182,25 @@ class Episode(object):
 
     @property
     def image(self):
-        """Return an eventual cover image"""
+        """Return episode cover image"""
         directory = os.path.split(self.filename)[0]
         name = os.path.splitext(os.path.basename(self.filename))[0]
         image_files = []
 
-        for fn in os.listdir(directory):
-            fnname = os.path.splitext(fn)[0]
-            fnext = os.path.splitext(fn)[1]
-            if fnname == name:
-                if fnext.lower() in BOOK_COVER_EXTENSIONS:
-                    image_files.append(fn)
+        for root, dirs, files in os.walk(directory):
+            for fn in files:
+                fnname = os.path.splitext(fn)[0]
+                fnext = os.path.splitext(fn)[1]
+                if fnname == name:
+                    test=os.path.join(root,fn)
+                    if fnext.lower() in EPISODE_COVER_EXTENSIONS:
+                        image_files.append(test)
 
         if len(image_files) > 0:
-            abs_path_image = image_files[0]
-            return self._to_url(abs_path_image)
+            abs_path_image = os.path.relpath(image_files[0], directory)
+            return self._to_image_url(abs_path_image)
         else:
             return None
-
 
 class Channel(object):
     """Podcast channel"""
