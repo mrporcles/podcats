@@ -37,6 +37,7 @@ WEB_PATH = '/web'
 STATIC_PATH = '/static'
 TEMPLATES_ROOT = os.path.join(os.path.dirname(__file__), 'templates')
 EPISODE_COVER_EXTENSIONS = ('.jpg', '.jpeg', '.png')
+EPISODE_SUMMARY_EXTENSIONS = ('.txt')
 
 jinja2_env = Environment(loader=FileSystemLoader(TEMPLATES_ROOT))
 
@@ -87,6 +88,7 @@ class Episode(object):
             length=self.length,
             date=formatdate(self.date),
             image_url=self.image,
+            summary=self.summary,
         )
 
     def as_html(self):
@@ -201,6 +203,30 @@ class Episode(object):
             return self._to_image_url(abs_path_image)
         else:
             return None
+        
+    @property
+    def summary(self):
+        """Return episode summary"""
+        directory = os.path.split(self.filename)[0]
+        name = os.path.splitext(os.path.basename(self.filename))[0]
+        summary_files = []
+
+        for root, dirs, files in os.walk(directory):
+            for fn in files:
+                fnname = os.path.splitext(fn)[0]
+                fnext = os.path.splitext(fn)[1]
+                if fnname == name:
+                    test=os.path.join(root,fn)
+                    if fnext.lower() in EPISODE_SUMMARY_EXTENSIONS:
+                        summary_files.append(test)
+
+        if len(summary_files) > 0:
+            with open(summary_files[0], 'r') as file:
+                contents = file.read()
+            return contents
+        else:
+            return None
+        
 
 class Channel(object):
     """Podcast channel"""

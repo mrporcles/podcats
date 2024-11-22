@@ -6,4 +6,7 @@
     {% if image_url %}
         <itunes:image href="{{ image_url }}"/>
     {% endif %}
+    {% if summary %}
+        <description>{{ summary }}</description>
+    {% endif %}
 </item>
