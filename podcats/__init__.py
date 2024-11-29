@@ -257,6 +257,7 @@ class Channel(object):
         return template.render(
             title=escape(self.title),
             description=escape(self.description),
+            root_url=escape(self.root_url),
             link=escape(self.link),
             items=u''.join(episode.as_xml() for episode in sorted(self, reverse=True))
         ).strip()
