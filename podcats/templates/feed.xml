@@ -8,7 +8,7 @@
         <itunes:category text="Music" />
         <itunes:explicit>true</itunes:explicit>
         <image>
-          <url>{{ link }}/static/show.jpg</url>
+          <url>{{ root_url }}/static/show.jpg</url>
           <title>{{ title }}</title>
           <link>{{ link }}</link>
         </image>
