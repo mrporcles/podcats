@@ -8,12 +8,11 @@
         <itunes:category text="Music" />
         <itunes:explicit>true</itunes:explicit>
         <image>
-          <url>{{ link }}/static/essentialmix.jpg</url>
+          <url>{{ link }}/static/show.jpg</url>
           <title>{{ title }}</title>
-          <link>https://www.bbc.co.uk/programmes/b006wkfp</link>
+          <link>{{ link }}</link>
         </image>
-        <itunes:image href="{{ link }}/static/essentialmix.jpg" />
-        
+        <itunes:image href="{{ link }}/static/show.jpg" />
         <link>{{ link }}</link>
         {{ items }}
     </channel>
