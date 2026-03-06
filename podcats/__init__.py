@@ -264,6 +264,7 @@ class Channel(object):
             title=escape(self.title),
             description=escape(self.description),
             link=escape(self.link),
+            root_url=escape(self.root_url),
             items=u''.join(episode.as_xml() for episode in sorted(self, reverse=True))
         ).strip()
 
