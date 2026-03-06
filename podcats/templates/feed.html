@@ -5,22 +5,166 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{{ title }}</title>
+    <link rel="preconnect" href="{{ static_host }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <style>
-        .book-cover {
-            width: 100%;
-            height: auto;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ static_host }}/static/style.css">
 </head>
-    <body>
-        <div class="container-fluid">
+<body>
+    <div class="container-fluid">
+        <header>
             <h1>{{ title }}</h1>
-            <p>{{ description }}.</p>
-            <p>Show link at <a href="{{ link }}">{{ link }}</a>.</p>
-            <div class="row">
-                {{ items }}
+            <p class="description">{{ description }}.</p>
+            <p class="description"><a href="{{ link }}" target="_blank" rel="noopener">Episode Information</a></p>
+            <p class="description"><a href="/" target="_blank" rel="noopener">RSS Feed</a></p>
+        </header>
+
+        <div class="controls-bar">
+            <div class="filter-bar">
+                <label for="year-filter">Filter by year:</label>
+                <select id="year-filter">
+                    <option value="all">All Years</option>
+                    {% for year in years %}
+                    <option value="{{ year }}">{{ year }}</option>
+                    {% endfor %}
+                </select>
             </div>
+            <p class="episode-count">Showing <span id="visible-count">{{ initial_visible }}</span> of <span id="filtered-count">{{ total_episodes }}</span> episodes</p>
         </div>
-    </body>
+
+        <div id="episodes-container">
+            {{ items }}
+        </div>
+
+        <button id="load-more-btn"{% if initial_visible >= total_episodes %} style="display: none;"{% endif %}>Load More Episodes</button>
+    </div>
+
+    <script>
+    (function() {
+        const ITEMS_PER_LOAD = 50;
+        const totalCount = {{ total_episodes }};
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        const visibleCountEl = document.getElementById('visible-count');
+        const filteredCountEl = document.getElementById('filtered-count');
+        const yearFilter = document.getElementById('year-filter');
+        const episodes = document.querySelectorAll('.episode');
+        
+        let currentYear = 'all';
+        let visibleCount = {{ initial_visible }};
+        let currentlyPlaying = null;
+
+        // Stop other audio when a new one starts
+        document.addEventListener('play', function(e) {
+            if (e.target.tagName === 'AUDIO') {
+                if (currentlyPlaying && currentlyPlaying !== e.target) {
+                    currentlyPlaying.pause();
+                }
+                currentlyPlaying = e.target;
+            }
+        }, true);
+
+        // Lazy loading with Intersection Observer
+        const lazyObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    
+                    // Lazy load images
+                    if (el.classList.contains('lazy-img') && el.dataset.src) {
+                        el.src = el.dataset.src;
+                        delete el.dataset.src;
+                        lazyObserver.unobserve(el);
+                    }
+                    
+                    // Lazy load audio
+                    if (el.classList.contains('lazy-audio') && el.dataset.src) {
+                        const source = document.createElement('source');
+                        source.src = el.dataset.src;
+                        el.appendChild(source);
+                        el.preload = 'metadata';
+                        el.load();
+                        delete el.dataset.src;
+                        lazyObserver.unobserve(el);
+                    }
+                }
+            });
+        }, {
+            rootMargin: '200px'
+        });
+
+        // Observe all lazy elements
+        document.querySelectorAll('.lazy-img[data-src], .lazy-audio[data-src]').forEach(function(el) {
+            lazyObserver.observe(el);
+        });
+
+        function applyFilter() {
+            const year = yearFilter.value;
+            currentYear = year;
+            let shown = 0;
+            let total = 0;
+            
+            episodes.forEach(function(ep, index) {
+                const epYear = ep.getAttribute('data-year');
+                const matchesFilter = (year === 'all' || epYear === year);
+                
+                if (matchesFilter) {
+                    total++;
+                    if (shown < ITEMS_PER_LOAD) {
+                        ep.classList.remove('hidden');
+                        shown++;
+                    } else {
+                        ep.classList.add('hidden');
+                    }
+                } else {
+                    ep.classList.add('hidden');
+                }
+            });
+            
+            visibleCount = shown;
+            visibleCountEl.textContent = shown;
+            filteredCountEl.textContent = total;
+            
+            if (shown >= total) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'block';
+            }
+        }
+
+        function loadMore() {
+            const year = currentYear;
+            let shown = 0;
+            let newlyShown = 0;
+            
+            episodes.forEach(function(ep) {
+                const epYear = ep.getAttribute('data-year');
+                const matchesFilter = (year === 'all' || epYear === year);
+                
+                if (matchesFilter) {
+                    if (!ep.classList.contains('hidden')) {
+                        shown++;
+                    } else if (newlyShown < ITEMS_PER_LOAD) {
+                        ep.classList.remove('hidden');
+                        shown++;
+                        newlyShown++;
+                    }
+                }
+            });
+            
+            visibleCount = shown;
+            visibleCountEl.textContent = shown;
+            
+            const total = parseInt(filteredCountEl.textContent);
+            if (shown >= total) {
+                loadMoreBtn.style.display = 'none';
+            }
+        }
+
+        yearFilter.addEventListener('change', applyFilter);
+        loadMoreBtn.addEventListener('click', loadMore);
+    })();
+    </script>
+</body>
 </html>

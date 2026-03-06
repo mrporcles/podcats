@@ -1,16 +1,20 @@
-<article class="col-md-6 col-lg-4">
-    <h2><a href="{{ url }}">{{ title }}</a></h2>
+<article class="episode{% if index >= 50 %} hidden{% endif %}" data-index="{{ index }}" data-year="{{ year }}">
     {% if image_url %}
-    <img class="episode-cover" src="{{ image_url }}" width="250" height="250"/>
+    <a href="{{ url }}" class="episode-cover-link">
+        <img class="episode-cover lazy-img" {% if index < 9 %}src="{{ image_url }}"{% else %}data-src="{{ image_url }}"{% endif %} alt="{{ title }}"/>
+    </a>
     {% endif %}
-    <ul>
-        <li>Directory: {{ directory }}</li>
-        <li>File: {{ filename }}</li>
-        <li>Date: {{ date }}</li>
-        <li>Size: {{ length }}</li>
-        <li>Mimetype: {{ mimetype }}</li>
-    </ul>
-    <audio controls>
-        <source src="{{ url }}"/>
-    </audio>
+    <div class="episode-content">
+        <h2><a href="{{ url }}">{{ title }}</a></h2>
+        <ul class="episode-meta">
+            <li>Directory: {{ directory }}</li>
+            <li>File: {{ filename }}</li>
+            <li>Date: {{ date }}</li>
+            <li>Size: {{ length }}</li>
+            <li>Mimetype: {{ mimetype }}</li>
+        </ul>
+
+        <audio controls preload="none" class="lazy-audio" data-src="{{ url }}">
+        </audio>
+    </div>
 </article>

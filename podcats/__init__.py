@@ -37,7 +37,7 @@ WEB_PATH = '/web'
 STATIC_PATH = '/static'
 TEMPLATES_ROOT = os.path.join(os.path.dirname(__file__), 'templates')
 EPISODE_COVER_EXTENSIONS = ('.jpg', '.jpeg', '.png')
-EPISODE_SUMMARY_EXTENSIONS = ('.txt')
+EPISODE_SUMMARY_EXTENSIONS = ('.txt',)
 
 jinja2_env = Environment(loader=FileSystemLoader(TEMPLATES_ROOT))
 
@@ -91,7 +91,7 @@ class Episode(object):
             summary=self.summary,
         )
 
-    def as_html(self):
+    def as_html(self, index=0):
         """Return episode item html"""
         filename = os.path.basename(self.filename)
         directory = os.path.split(os.path.dirname(self.filename))[-1]
@@ -110,6 +110,8 @@ class Episode(object):
             length=humanize.naturalsize(self.length),
             date=date,
             image_url=self.image,
+            index=index,
+            year=self.year,
         )
 
     def get_tag(self, name):
@@ -175,6 +177,11 @@ class Episode(object):
         return dt
 
     @property
+    def year(self):
+        """Return episode year"""
+        return datetime.datetime.fromtimestamp(self.date).year
+
+    @property
     def mimetype(self):
         """Return file mimetype name"""
         if self.filename.endswith('m4b'):
@@ -202,8 +209,8 @@ class Episode(object):
             abs_path_image = os.path.relpath(image_files[0], directory)
             return self._to_image_url(abs_path_image)
         else:
-            return None
-        
+            return self.root_url + '/static/show.jpg'
+
     @property
     def summary(self):
         """Return episode summary"""
@@ -216,7 +223,7 @@ class Episode(object):
                 fnname = os.path.splitext(fn)[0]
                 fnext = os.path.splitext(fn)[1]
                 if fnname == name:
-                    test=os.path.join(root,fn)
+                    test = os.path.join(root, fn)
                     if fnext.lower() in EPISODE_SUMMARY_EXTENSIONS:
                         summary_files.append(test)
 
@@ -226,12 +233,11 @@ class Episode(object):
             return contents
         else:
             return None
-        
 
 class Channel(object):
     """Podcast channel"""
 
-    def __init__(self, root_dir, root_url, host, port, title, description, link, debug=False):
+    def __init__(self, root_dir, root_url, host, port, title, link, description=None, debug=False):
         self.root_dir = root_dir or os.getcwd()
         self.root_url = root_url
         self.host = host
@@ -257,7 +263,6 @@ class Channel(object):
         return template.render(
             title=escape(self.title),
             description=escape(self.description),
-            root_url=escape(self.root_url),
             link=escape(self.link),
             items=u''.join(episode.as_xml() for episode in sorted(self, reverse=True))
         ).strip()
@@ -265,11 +270,25 @@ class Channel(object):
     def as_html(self):
         """Return channel HTML with all episode items"""
         template = jinja2_env.get_template('feed.html')
+        episodes = sorted(self, reverse=True)
+        total_episodes = len(episodes)
+        initial_visible = min(50, total_episodes)
+        
+        from urllib.parse import urlparse
+        parsed = urlparse(self.root_url)
+        static_host = f"{parsed.scheme}://{parsed.netloc}"
+        
+        years = sorted(set(episode.year for episode in episodes), reverse=True)
+        
         return template.render(
             title=escape(self.title),
             description=self.description,
             link=escape(self.link),
-            items=u''.join(episode.as_html() for episode in sorted(self, reverse=True)),
+            items=u'\n'.join(episode.as_html(index=i) for i, episode in enumerate(episodes)),
+            total_episodes=total_episodes,
+            initial_visible=initial_visible,
+            static_host=static_host,
+            years=years,
         ).strip().encode("utf-8", "surrogateescape")
 
 
@@ -310,7 +329,9 @@ def main():
     if args.action == 'generate':
         print(channel.as_xml())
     elif args.action == 'generate_html':
-        print(channel.as_html())
+        import sys
+        sys.stdout.buffer.write(channel.as_html())
+        sys.stdout.buffer.write(b'\n')
     else:
         print('Welcome to the Podcats web server!')
         print('\nYour podcast feed is available at:\n')
